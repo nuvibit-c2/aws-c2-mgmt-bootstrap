@@ -7,7 +7,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 6.0"
+      version = ">= 6.37.0"
     }
   }
 }
@@ -71,8 +71,6 @@ resource "aws_kms_alias" "ntc_state_bucket_encryption" {
 # ---------------------------------------------------------------------------------------------------------------------
 # ¦ S3 BUCKET - STATE STORAGE
 # ---------------------------------------------------------------------------------------------------------------------
-# ignore bucket logging configuration because this bucket doesn't require logging
-# tfsec:ignore:AVD-AWS-0089
 resource "aws_s3_bucket" "ntc_tfstate" {
   region = var.region
 

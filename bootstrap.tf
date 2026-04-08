@@ -78,7 +78,7 @@ variable "oidc_provider_url" {
 variable "oidc_client_id_list" {
   description = "List of OIDC client IDs (audiences) allowed to assume the role"
   type        = list(string)
-  default     = ["sts.amazonaws.com"]
+  nullable    = false
 }
 
 variable "oidc_role_name" {
@@ -104,7 +104,7 @@ variable "oidc_subjects" {
   }
 
   validation {
-    condition     = alltrue([for s in var.oidc_subjects : !can(regex("MY_ORG|MY_REPO|MY_GROUP|MY_PROJECT|ACCOUNT_NAME|EXAMPLE|PLACEHOLDER", upper(s)))])
+    condition     = alltrue([for s in var.oidc_subjects : !can(regex("MY_ORG|MY_REPO|MY_GROUP|MY_PROJECT|MY_STACK_ID|MY_SPACE_ID|MY_WORKSPACE", upper(s)))])
     error_message = "OIDC subjects still contain placeholder values (e.g. MY_ORG, MY_REPO). Update them with your actual organization and repository names."
   }
 }
@@ -116,7 +116,7 @@ variable "oidc_policy_arn" {
   nullable    = false
 
   validation {
-    condition     = can(regex("^arn:aws(-[a-z]+)*:iam::[0-9]*:policy/[a-zA-Z0-9+=,.@_/-]+$", var.oidc_policy_arn))
+    condition     = can(regex("^arn:aws[a-z-]*:iam:.*", var.oidc_policy_arn))
     error_message = "Must be a valid IAM policy ARN (e.g. arn:aws:iam::aws:policy/AdministratorAccess or arn:aws:iam::123456789012:policy/MyPolicy)."
   }
 }
