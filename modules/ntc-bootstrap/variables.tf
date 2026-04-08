@@ -1,9 +1,20 @@
 # ---------------------------------------------------------------------------------------------------------------------
 # ¦ REQUIRED VARIABLES
 # ---------------------------------------------------------------------------------------------------------------------
+variable "region" {
+  description = "AWS region where the resources will be created"
+  type        = string
+}
+
 variable "state_bucket_name" {
   description = "Name of the S3 bucket that will be created for storing Terraform/OpenTofu state files"
   type        = string
+}
+
+variable "state_bucket_account_regional_namespace" {
+  description = "Whether the S3 bucket should use a regional namespace. This allows naming the state bucket the same across acccounts"
+  type        = bool
+  default     = false
 }
 
 variable "oidc_configuration" {

@@ -33,12 +33,16 @@ locals {
 # ¦ KMS ENCRYPTION
 # ---------------------------------------------------------------------------------------------------------------------
 resource "aws_kms_key" "ntc_state_bucket_encryption" {
+  region = var.region
+
   description             = "encryption key for terraform/opentofu state bucket"
   deletion_window_in_days = var.kms_deletion_window_in_days
   enable_key_rotation     = var.kms_key_rotation_enabled
 }
 
 resource "aws_kms_key_policy" "ntc_state_bucket_encryption" {
+  region = var.region
+
   key_id = aws_kms_key.ntc_state_bucket_encryption.key_id
   policy = data.aws_iam_policy_document.ntc_state_bucket_encryption_policy.json
 }
@@ -58,6 +62,8 @@ data "aws_iam_policy_document" "ntc_state_bucket_encryption_policy" {
 }
 
 resource "aws_kms_alias" "ntc_state_bucket_encryption" {
+  region = var.region
+
   name          = "alias/state-bucket"
   target_key_id = aws_kms_key.ntc_state_bucket_encryption.key_id
 }
@@ -68,10 +74,15 @@ resource "aws_kms_alias" "ntc_state_bucket_encryption" {
 # ignore bucket logging configuration because this bucket doesn't require logging
 # tfsec:ignore:AVD-AWS-0089
 resource "aws_s3_bucket" "ntc_tfstate" {
-  bucket = var.state_bucket_name
+  region = var.region
+
+  bucket           = var.state_bucket_account_regional_namespace ? "${var.state_bucket_name}-${local.current_account_id}-${var.region}-an" : var.state_bucket_name
+  bucket_namespace = var.state_bucket_account_regional_namespace ? "account-regional" : "global"
 }
 
 resource "aws_s3_bucket_ownership_controls" "ntc_tfstate" {
+  region = var.region
+
   bucket = aws_s3_bucket.ntc_tfstate.id
   rule {
     object_ownership = "BucketOwnerPreferred"
@@ -79,6 +90,8 @@ resource "aws_s3_bucket_ownership_controls" "ntc_tfstate" {
 }
 
 resource "aws_s3_bucket_acl" "ntc_tfstate" {
+  region = var.region
+
   bucket = aws_s3_bucket.ntc_tfstate.id
   acl    = "private"
 
@@ -86,6 +99,8 @@ resource "aws_s3_bucket_acl" "ntc_tfstate" {
 }
 
 resource "aws_s3_bucket_versioning" "ntc_tfstate" {
+  region = var.region
+
   bucket = aws_s3_bucket.ntc_tfstate.id
   versioning_configuration {
     status = "Enabled"
@@ -93,6 +108,8 @@ resource "aws_s3_bucket_versioning" "ntc_tfstate" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "ntc_tfstate" {
+  region = var.region
+
   bucket = aws_s3_bucket.ntc_tfstate.id
   rule {
     apply_server_side_encryption_by_default {
@@ -103,6 +120,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "ntc_tfstate" {
 }
 
 resource "aws_s3_bucket_public_access_block" "ntc_tfstate" {
+  region = var.region
+
   bucket                  = aws_s3_bucket.ntc_tfstate.id
   block_public_acls       = true
   block_public_policy     = true
@@ -126,7 +145,7 @@ data "aws_iam_policy_document" "ntc_tfstate_bucket_policy" {
 
     resources = [
       aws_s3_bucket.ntc_tfstate.arn,
-      "$${aws_s3_bucket.ntc_tfstate.arn}/*",
+      "${aws_s3_bucket.ntc_tfstate.arn}/*",
     ]
 
     condition {
@@ -150,7 +169,7 @@ data "aws_iam_policy_document" "ntc_tfstate_bucket_policy" {
 
     resources = [
       aws_s3_bucket.ntc_tfstate.arn,
-      "$${aws_s3_bucket.ntc_tfstate.arn}/*",
+      "${aws_s3_bucket.ntc_tfstate.arn}/*",
     ]
 
     condition {
@@ -179,12 +198,14 @@ data "aws_iam_policy_document" "ntc_tfstate_bucket_policy" {
 
     resources = [
       aws_s3_bucket.ntc_tfstate.arn,
-      "$${aws_s3_bucket.ntc_tfstate.arn}/*"
+      "${aws_s3_bucket.ntc_tfstate.arn}/*"
     ]
   }
 }
 
 resource "aws_s3_bucket_policy" "ntc_tfstate" {
+  region = var.region
+
   bucket = aws_s3_bucket.ntc_tfstate.id
   policy = data.aws_iam_policy_document.ntc_tfstate_bucket_policy.json
 
@@ -211,12 +232,12 @@ data "aws_iam_policy_document" "ntc_oidc_assume_role_policy" {
     }
     condition {
       test     = "StringEquals"
-      variable = "$${local.oidc_provider}:aud"
+      variable = "${local.oidc_provider}:aud"
       values   = var.oidc_configuration.client_id_list
     }
     condition {
       test     = "StringLike"
-      variable = "$${local.oidc_provider}:sub"
+      variable = "${local.oidc_provider}:sub"
       values   = var.oidc_configuration.subjects
     }
   }
