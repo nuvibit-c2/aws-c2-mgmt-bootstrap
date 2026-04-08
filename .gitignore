@@ -1,14 +1,14 @@
 # Local .terraform directories
 **/.terraform/*
 
-# .tfstate files
+# .tfstate files (bootstrap state is local and disposable)
 *.tfstate
 *.tfstate.*
 
 # Crash log files
 crash.log
 
-#Terrform lock files
+# Terraform lock files
 *.lock.hcl
 
 # Ignore any .tfvars files that are generated automatically for each Terraform run. Most
@@ -16,6 +16,9 @@ crash.log
 # version control.
 #
 # example.tfvars
+
+# Include the bootstrap tfvars as it serves as the user configuration template
+!bootstrap.auto.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in

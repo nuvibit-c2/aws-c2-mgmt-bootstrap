@@ -1,14 +1,9 @@
 output "default_region" {
-  description = "The default region name"
+  description = "The AWS region used for bootstrap resources"
   value       = local.default_region
 }
 
 output "account_id" {
-  description = "The current account id"
+  description = "The AWS account ID where bootstrap was applied"
   value       = local.current_account_id
 }
-
-# output "ntc_parameters" {
-#   description = "Map of all ntc parameters"
-#   value       = local.ntc_parameters
-# }
