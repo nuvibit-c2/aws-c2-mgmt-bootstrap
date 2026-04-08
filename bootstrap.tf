@@ -1,3 +1,5 @@
+# DO NOT MODIFY — edit 'config.auto.tfvars' instead
+
 # ---------------------------------------------------------------------------------------------------------------------
 # ¦ BACKEND
 # ---------------------------------------------------------------------------------------------------------------------
@@ -37,6 +39,7 @@ terraform {
 variable "region" {
   description = "AWS region where the state bucket, KMS key, and OIDC provider will be created"
   type        = string
+  nullable    = false
 
   validation {
     condition     = can(regex("^[a-z]{2}-[a-z]+-[0-9]+$", var.region))
@@ -47,11 +50,13 @@ variable "region" {
 variable "state_bucket_account_regional_namespace" {
   description = "Use account-regional namespace for the S3 bucket (allows reusing the same bucket name across accounts)"
   type        = bool
+  nullable    = false
 }
 
 variable "state_bucket_name" {
   description = "Name of the S3 bucket for storing Terraform/OpenTofu state files"
   type        = string
+  nullable    = false
 
   validation {
     condition     = can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", var.state_bucket_name))
@@ -62,6 +67,7 @@ variable "state_bucket_name" {
 variable "oidc_provider_url" {
   description = "URL of the OIDC identity provider (e.g. https://token.actions.githubusercontent.com for GitHub Actions)"
   type        = string
+  nullable    = false
 
   validation {
     condition     = can(regex("^https://", var.oidc_provider_url))
@@ -79,15 +85,27 @@ variable "oidc_role_name" {
   description = "Name of the IAM role that the CI/CD pipeline will assume via OIDC"
   type        = string
   default     = "ntc-oidc-github-role"
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9+=,.@_-]{1,64}$", var.oidc_role_name))
+    error_message = "Must be a valid IAM role name (alphanumeric, +=,.@_- allowed, max 64 characters)."
+  }
 }
 
 variable "oidc_subjects" {
   description = "List of OIDC subject claims allowed to assume the role (e.g. repo:ORG/REPO:*)"
   type        = list(string)
+  nullable    = false
 
   validation {
     condition     = length(var.oidc_subjects) > 0
     error_message = "At least one OIDC subject must be specified."
+  }
+
+  validation {
+    condition     = alltrue([for s in var.oidc_subjects : !can(regex("MY_ORG|MY_REPO|MY_GROUP|MY_PROJECT|ACCOUNT_NAME|EXAMPLE|PLACEHOLDER", upper(s)))])
+    error_message = "OIDC subjects still contain placeholder values (e.g. MY_ORG, MY_REPO). Update them with your actual organization and repository names."
   }
 }
 
@@ -95,6 +113,12 @@ variable "oidc_policy_arn" {
   description = "ARN of the IAM policy to attach to the OIDC role"
   type        = string
   default     = "arn:aws:iam::aws:policy/AdministratorAccess"
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^arn:aws(-[a-z]+)*:iam::[0-9]*:policy/[a-zA-Z0-9+=,.@_/-]+$", var.oidc_policy_arn))
+    error_message = "Must be a valid IAM policy ARN (e.g. arn:aws:iam::aws:policy/AdministratorAccess or arn:aws:iam::123456789012:policy/MyPolicy)."
+  }
 }
 
 variable "oidc_max_session_duration_hours" {
@@ -111,8 +135,6 @@ variable "oidc_max_session_duration_hours" {
 # ---------------------------------------------------------------------------------------------------------------------
 # ¦ DATA
 # ---------------------------------------------------------------------------------------------------------------------
-data "aws_region" "default" {}
-data "aws_partition" "current" {}
 data "aws_caller_identity" "current" {}
 
 # ---------------------------------------------------------------------------------------------------------------------

@@ -41,7 +41,7 @@ git clone https://github.com/nuvibit-c2/aws-c2-mgmt-bootstrap.git
 cd aws-c2-mgmt-bootstrap
 ```
 
-Edit `bootstrap.auto.tfvars` with your configuration:
+Edit `config.auto.tfvars` with your configuration:
 
 ```hcl
 # AWS region for state bucket, KMS key, and OIDC provider
