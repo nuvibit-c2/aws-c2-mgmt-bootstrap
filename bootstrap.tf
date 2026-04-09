@@ -171,3 +171,19 @@ output "account_id" {
   description = "The AWS account ID where bootstrap was applied"
   value       = local.current_account_id
 }
+
+output "backend_config" {
+  description = "Ready-to-use Terraform/OpenTofu backend configuration block — copy this into your backend.tf"
+  value       = <<-EOT
+    terraform {
+      backend "s3" {
+        bucket       = "${module.ntc_bootstrap.state_bucket_name}"
+        key          = "<STACK_NAME>/tofu.tfstate"
+        region       = "${module.ntc_bootstrap.state_bucket_region}"
+        encrypt      = true
+        kms_key_id   = "${module.ntc_bootstrap.kms_key_alias}"
+        use_lockfile = true
+      }
+    }
+  EOT
+}
