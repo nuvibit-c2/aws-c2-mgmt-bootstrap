@@ -17,7 +17,7 @@ The NTC Implementation Blueprints provide a complete, production-ready example o
 
 ## 📋 Purpose of This Repository
 
-This repository (`aws-c2-mgmt-bootstrap`) is the **one-time initial setup step** for a new NTC implementation. It is executed locally against the AWS Management Account to provision the foundational resources required by all subsequent NTC blueprint repositories:
+This repository (`aws-c2-mgmt-ntc-bootstrap`) is the **one-time initial setup step** for a new NTC implementation. It is executed locally against the AWS Management Account to provision the foundational resources required by all subsequent NTC blueprint repositories:
 
 - **State Storage**: Creates a secure, encrypted S3 bucket for storing Terraform/OpenTofu state files
 - **KMS Encryption**: Creates a KMS key for state file encryption at rest
@@ -37,8 +37,8 @@ This repository (`aws-c2-mgmt-bootstrap`) is the **one-time initial setup step**
 ### Step 1: Clone and Configure
 
 ```bash
-git clone https://github.com/nuvibit-c2/aws-c2-mgmt-bootstrap.git
-cd aws-c2-mgmt-bootstrap
+git clone https://github.com/nuvibit-c2/aws-c2-mgmt-ntc-bootstrap.git
+cd aws-c2-mgmt-ntc-bootstrap
 ```
 
 Edit `config.auto.tfvars` with your configuration:
@@ -118,7 +118,7 @@ The NTC Implementation Blueprints consist of multiple repositories, each managin
 
 ### Bootstrap
 
-#### 0. [aws-c2-mgmt-bootstrap](https://github.com/nuvibit-c2/aws-c2-mgmt-bootstrap) ← *You are here*
+#### 0. [aws-c2-mgmt-ntc-bootstrap](https://github.com/nuvibit-c2/aws-c2-mgmt-ntc-bootstrap) ← *You are here*
 **Purpose**: One-time initial setup for a new NTC implementation
 **Creates**: S3 state bucket, KMS encryption key, OIDC provider and IAM role for CI/CD
 
@@ -161,7 +161,7 @@ The NTC Implementation Blueprints consist of multiple repositories, each managin
 
 The blueprint repositories should be deployed in the following order:
 
-0. **aws-c2-mgmt-bootstrap** ← *You are here* (one-time local apply)
+0. **aws-c2-mgmt-ntc-bootstrap** ← *You are here* (one-time local apply)
 1. **aws-c2-mgmt-organizations** (creates organization structure)
 2. **aws-c2-mgmt-account-factory** (creates core accounts)
 3. **aws-c2-mgmt-identity-center** (creates SSO permissions)
