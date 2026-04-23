@@ -24,9 +24,10 @@ data "tls_certificate" "oidc_provider_cert" {
 # ¦ LOCALS
 # ---------------------------------------------------------------------------------------------------------------------
 locals {
-  current_account_id = data.aws_caller_identity.current.account_id
-  kms_key_arn        = aws_kms_key.ntc_state_bucket_encryption.arn
-  oidc_provider      = trimprefix(var.oidc_configuration.provider_url, "https://")
+  current_account_id  = data.aws_caller_identity.current.account_id
+  kms_key_arn         = aws_kms_key.ntc_state_bucket_encryption.arn
+  oidc_provider       = trimprefix(var.oidc_configuration.provider_url, "https://")
+  tfstate_bucket_name = var.state_bucket_account_regional_namespace ? "${var.state_bucket_name}-${local.current_account_id}-${var.region}-an" : var.state_bucket_name
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -64,7 +65,7 @@ data "aws_iam_policy_document" "ntc_state_bucket_encryption_policy" {
 resource "aws_kms_alias" "ntc_state_bucket_encryption" {
   region = var.region
 
-  name          = "alias/state-bucket"
+  name          = "alias/tfstate/${local.tfstate_bucket_name}"
   target_key_id = aws_kms_key.ntc_state_bucket_encryption.key_id
 }
 
@@ -74,7 +75,7 @@ resource "aws_kms_alias" "ntc_state_bucket_encryption" {
 resource "aws_s3_bucket" "ntc_tfstate" {
   region = var.region
 
-  bucket           = var.state_bucket_account_regional_namespace ? "${var.state_bucket_name}-${local.current_account_id}-${var.region}-an" : var.state_bucket_name
+  bucket           = local.tfstate_bucket_name
   bucket_namespace = var.state_bucket_account_regional_namespace ? "account-regional" : "global"
 }
 
